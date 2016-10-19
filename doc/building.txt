@@ -1,0 +1,43 @@
+
+== Initial setup ==
+
+There are several one time steps that need to be done after cloning a
+new repo. These are all handled by running:
+
+ ./init-buildroot.sh
+
+== Building ==
+
+It's best to look at what run-buildroot.sh does, but the basic flow
+for building an image is:
+
+Create the overlay (for the client image):
+
+ mkdir overlay-client
+ cp -a common-files/* overlay-client
+
+Copy the defconfig and create an output directory (for the client
+image, for example):
+
+ cp conf/buildroot-client.config buildroot/configs/manila_client_defconfig
+ ( cd buildroot ; make O=../output-client manila_client_defconfig )
+ rm buildroot/configs/manila_client_defconfig
+
+Then invoke make in the appropriate directory:
+
+ ( cd buildroot ; make O=../output-client all )
+
+== Creating the qcow2 image ==
+
+After buildroot succeeds, create the qcow2 file (for the client image,
+for example):
+
+ ./make-bootable-disk.sh client
+
+== Cleaning ==
+
+To do a simple clean after changing some config options (for the client
+image, for example):
+
+ cd buildroot
+ make O=../output-client clean

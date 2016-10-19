@@ -26,25 +26,23 @@ On Fedora:
  sudo dnf -y install bison flex texinfo gettext ncurses-devel unzip \
      sshpass quilt qt-devel qemu-kvm gcc-c++ make glibc-devel.i686
 
-== Building the image ==
+== Building the images ==
 
-To make buildroot compile the system run:
+To build both images run:
 
  ./run-buildroot.sh
 
-After buildroot succeeds, create the qcow2 file:
-
- ./make-bootable-disk.sh client
-
-== Cleaning ==
-
-To do a simple clean after changing some config options:
-
- cd buildroot
- make O=../output-client clean
+== Cleaning up ==
 
 To nuke everything and start over:
 
  rm -rf buildroot output* overlay*
  sudo rm *.qcow2
 
+== Detailed Docs ==
+
+More detailed docs are available:
+
+* doc/building.txt - individual build steps
+* doc/configuring.txt - how to change the config
+* doc/testing.txt - how to test the images
