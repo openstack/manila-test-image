@@ -1,0 +1,47 @@
+
+== Changing Configuration ==
+
+There are 6 config files which you might want to update. They are
+all stored in the conf directory and buildroot has make targets
+which let you modify them using the builtin menus programs
+included with those programs.
+
+=== Buildroot ===
+
+NAME=client # or "server" or "debug"
+
+cd buildroot
+cp ../conf/buildroot-${NAME}.config configs/manila_${NAME}_defconfig
+make O=../output-${NAME} manila_${NAME}_defconfig
+rm configs/manila_${NAME}_defconfig
+make O=../output-${NAME} xconfig
+make O=../output-${NAME} savedefconfig BR2_DEFCONFIG=../conf/buildroot-${NAME}.config
+
+=== Busybox ===
+
+cd buildroot
+cp ../conf/buildroot.config configs/manila_defconfig
+make O=../output manila_defconfig
+rm configs/manila_defconfig
+make O=../output busybox-menuconfig
+make O=../output busybox-update-config
+sed -i 's/#.*//;/^[[:blank:]]*$/d' ../conf/busybox.config
+
+=== uClibc ===
+
+cd buildroot
+cp ../conf/buildroot.config configs/manila_defconfig
+make O=../output manila_defconfig
+rm configs/manila_defconfig
+make O=../output uclibc-menuconfig
+make O=../output uclibc-update-config
+sed -i 's/#.*//;/^[[:blank:]]*$/d;/^KERNEL_HEADERS=/d;/^CROSS_COMPILER_PREFIX=/d' ../conf/uclibc.config
+
+=== Linux ===
+
+cd buildroot
+cp ../conf/buildroot.config configs/manila_defconfig
+make O=../output manila_defconfig
+rm configs/manila_defconfig
+make O=../output linux-menuconfig
+make O=../output linux-update-defconfig

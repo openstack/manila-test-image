@@ -1,0 +1,19 @@
+#!/bin/sh
+
+mkdir -p /root/.ssh
+cd /root/.ssh
+chown 700 .
+[ -f authorized_keys ] || touch authorized_keys
+chown 600 authorized_keys
+
+url="http://169.254.169.254/2009-04-04/meta-data"
+(
+	wget -q -O - -T 10 $url/public-keys 2> /dev/null || exit 1
+	echo
+) | (
+	while read line
+	do
+	key=$(echo $line | sed 's/\([0-9]\+\)=.*/\1/')
+	wget -q -O - -T 10 $url/public-keys/$key/openssh-key 2> /dev/null || exit 1
+	done
+) >> /root/.ssh/authorized_keys

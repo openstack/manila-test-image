@@ -1,0 +1,219 @@
+This patch adds the libnfsidmap package to buildroot, which
+is required for NFSv4.
+
+Index: buildroot/package/Config.in
+===================================================================
+--- buildroot.orig/package/Config.in	2016-03-01 15:47:30.000000000 -0500
++++ buildroot/package/Config.in	2016-05-23 22:53:39.675616052 -0400
+@@ -1098,6 +1098,7 @@
+ 	source "package/libnetfilter_log/Config.in"
+ 	source "package/libnetfilter_queue/Config.in"
+ 	source "package/libnfnetlink/Config.in"
++	source "package/libnfsidmap/Config.in"
+ 	source "package/libnftnl/Config.in"
+ 	source "package/libnice/Config.in"
+ 	source "package/libnl/Config.in"
+Index: buildroot/package/libnfsidmap/Config.in
+===================================================================
+--- /dev/null  1970-01-01 00:00:00.000000000 +0000
++++ buildroot/package/libnfsidmap/Config.in	2016-05-24 14:05:59.464401417 -0400
+@@ -0,0 +1,6 @@
++config BR2_PACKAGE_LIBNFSIDMAP
++	bool "libnfsidmap"
++	help
++	  Library used by the NFSv4 server to do userid mapping.
++
++	  http://www.citi.umich.edu/projects/nfsv4/linux/libnfsidmap
+Index: buildroot/package/libnfsidmap/libnfsidmap.mk
+===================================================================
+--- /dev/null  1970-01-01 00:00:00.000000000 +0000
++++ buildroot/package/libnfsidmap/libnfsidmap.mk	2016-05-24 14:07:41.559984998 -0400
+@@ -0,0 +1,12 @@
++#
++# libnfsidmap
++#
++
++LIBNFSIDMAP_VERSION = 0.25
++LIBNFSIDMAP_SITE = http://www.citi.umich.edu/projects/nfsv4/linux/libnfsidmap
++LIBNFSIDMAP_SOURCE = libnfsidmap-$(LIBNFSIDMAP_VERSION).tar.gz
++LIBNFSIDMAP_INSTALL_STAGING = YES
++LIBNFSIDMAP_LICENSE = BSD-like
++LIBNFSIDMAP_LICENSE_FILES = COPYING
++
++$(eval $(autotools-package))
+Index: buildroot/package/nfs-utils/Config.in
+===================================================================
+--- buildroot.orig/package/nfs-utils/Config.in	2016-03-01 15:47:30.000000000 -0500
++++ buildroot/package/nfs-utils/Config.in	2016-05-24 14:10:45.008236759 -0400
+@@ -1,3 +1,4 @@
++
+ comment "nfs-utils needs a toolchain w/ threads"
+ 	depends on BR2_USE_MMU
+ 	depends on !BR2_TOOLCHAIN_HAS_THREADS
+@@ -34,4 +35,17 @@
+ 
+ endmenu
+ 
++config BR2_PACKAGE_NFS_UTILS_NFS4
++	bool "NFSv4 support"
++	depends on BR2_PACKAGE_NFS_UTILS
++	select BR2_PACKAGE_LIBEVENT
++	select BR2_PACKAGE_LIBNFSIDMAP
++	help
++	  Support for NFSv4.  Don't forget to enable the kernel facility
++	  also.
++
++
++comment "nfs-utils requires a toolchain with RPC and LARGEFILE support"
++	depends on !BR2_INET_RPC || !BR2_LARGEFILE
++
+ endif
+Index: buildroot/package/nfs-utils/etc-idmapd.conf
+===================================================================
+--- /dev/null  1970-01-01 00:00:00.000000000 +0000
++++ buildroot/package/nfs-utils/etc-idmapd.conf	2016-05-24 14:20:15.998907833 -0400
+@@ -0,0 +1,8 @@
++[General]
++Verbosity = 0
++Pipefs-Directory = /var/lib/nfs/rpc_pipefs
++Domain = localdomain
++
++[Mapping]
++Nobody-User = nobody
++Nobody-Group = nogroup
+Index: buildroot/package/nfs-utils/nfs-utils.mk
+===================================================================
+--- buildroot.orig/package/nfs-utils/nfs-utils.mk	2016-03-01 15:47:30.000000000 -0500
++++ buildroot/package/nfs-utils/nfs-utils.mk	2016-05-24 14:23:23.223169584 -0400
+@@ -15,15 +15,19 @@
+ NFS_UTILS_CONF_ENV = knfsd_cv_bsd_signals=no
+ 
+ NFS_UTILS_CONF_OPTS = \
+-	--disable-nfsv4 \
+-	--disable-nfsv41 \
+ 	--disable-gss \
+ 	--disable-uuid \
+-	--disable-ipv6 \
+ 	--without-tcp-wrappers \
+ 	--with-statedir=/run/nfs \
+ 	--with-rpcgen=internal
+ 
++ifeq ($(BR2_PACKAGE_LIBNFSIDMAP),y)
++NFS_UTILS_DEPENDENCIES += libevent libnfsidmap lvm2 sqlite
++NFS_UTILS_CONF_OPTS += --enable-nfsv4 --enable-nfsv41
++else
++NFS_UTILS_CONF_OPTS += --disable-nfsv4 --disable-nfsv41
++endif
++
+ NFS_UTILS_TARGETS_$(BR2_PACKAGE_NFS_UTILS_RPCDEBUG) += usr/sbin/rpcdebug
+ NFS_UTILS_TARGETS_$(BR2_PACKAGE_NFS_UTILS_RPC_LOCKD) += usr/sbin/rpc.lockd
+ NFS_UTILS_TARGETS_$(BR2_PACKAGE_NFS_UTILS_RPC_RQUOTAD) += usr/sbin/rpc.rquotad
+@@ -48,7 +52,16 @@
+ 	$(INSTALL) -D -m 644 \
+ 		$(@D)/utils/mount/nfsmount.conf $(TARGET_DIR)/etc/nfsmount.conf
+ endef
++
++define NFS_UTILS_INSTALL_IDMAPD_CONF
++	$(INSTALL) -m 0644 package/nfs-utils/etc-idmapd.conf \
++		$(TARGET_DIR)/etc/idmapd.conf
++endef
++
+ NFS_UTILS_POST_INSTALL_TARGET_HOOKS += NFS_UTILS_INSTALL_FIXUP
++ifeq ($(BR2_PACKAGE_NFS_UTILS_NFS4),y)
++  NFS_UTILS_POST_INSTALL_TARGET_HOOKS += NFS_UTILS_INSTALL_IDMAPD_CONF
++endif
+ 
+ ifeq ($(BR2_INIT_SYSTEMD),y)
+ NFS_UTILS_CONF_OPTS += --with-systemd=/usr/lib/systemd/system
+Index: buildroot/package/nfs-utils/S60nfs
+===================================================================
+--- buildroot.orig/package/nfs-utils/S60nfs	2016-03-01 15:47:30.000000000 -0500
++++ buildroot/package/nfs-utils/S60nfs	2016-05-24 14:19:29.510097452 -0400
+@@ -3,11 +3,17 @@
+ # nfs           This shell script takes care of starting and stopping
+ #               the NFS services. Stolen from RedHat FC5.
+ 
++ENABLEv4=yes
++
+ [ -x /usr/sbin/rpc.statd ] || exit 0
+ [ -x /usr/sbin/rpc.nfsd ] || exit 0
+ [ -x /usr/sbin/rpc.mountd ] || exit 0
+ [ -x /usr/sbin/exportfs ] || exit 0
+ 
++if [ $ENABLEv4 == "yes" ]; then
++	[ -x /usr/sbin/rpc.idmapd ] || exit 0
++fi
++
+ mkdir -p /var/lock/subsys
+ mkdir -p /run/nfs/sm
+ mkdir -p /run/nfs/sm.bak
+@@ -20,12 +26,26 @@
+     . "${CFG_FILE}"
+ fi
+ 
++if [ $ENABLEv4 == "yes" ]; then
++	pipefs_dir="`sed -n 's/^ *Pipefs-Directory *= *//p' /etc/idmapd.conf`"
++fi
++
+ 
+ start() {
+ 	# Start daemons.
++	if [ $ENABLEv4 == "yes" ]; then
++	  printf "Starting NFS idmapd: "
++	  [ -d /var/lib/nfs/v4recovery ] || mkdir -p /var/lib/nfs/v4recovery
++	  [ -d "$pipefs_dir" ] || mkdir -p "$pipefs_dir"
++	  if ! ( grep -q "on $pipefs_dir type rpc_pipefs" /proc/mounts ); then
++	    mount -t rpc_pipefs sunrpc "$pipefs_dir"
++	  fi
++	  rpc.idmapd
++	  echo "done"
++	fi
++
+ 	printf "Starting NFS statd: "
+ 	rpc.statd
+-	touch /var/lock/subsys/nfslock
+ 	echo "done"
+ 
+ 	printf "Starting NFS services: "
+@@ -39,11 +59,17 @@
+ 	printf "Starting NFS mountd: "
+ 	rpc.mountd
+ 	echo "done"
+-	touch /var/lock/subsys/nfs
+ }
+ 
+ stop() {
+ 	# Stop daemons.
++	if [ $ENABLEv4 == "yes" ]; then
++	  printf "Shutting down NFS idmapd: "
++	  killall -q rpc.idmapd
++	  umount "$pipefs_dir"
++	  echo "done"
++	fi
++
+ 	printf "Shutting down NFS mountd: "
+ 	killall -q rpc.mountd
+ 	echo "done"
+@@ -54,14 +80,12 @@
+ 
+ 	printf "Shutting down NFS services: "
+ 	/usr/sbin/exportfs -au
+-	rm -f /var/lock/subsys/nfs
+ 	killall -q rpc.statd
+ 	echo "done"
+ 
+ 	printf "Stopping NFS statd: "
+ 	killall -q rpc.statd
+ 	echo "done"
+-	rm -f /var/lock/subsys/nfslock
+ }
+ 
+ # See how we were called.
+@@ -78,7 +102,6 @@
+ 	;;
+   reload)
+ 	/usr/sbin/exportfs -r
+-	touch /var/lock/subsys/nfs
+ 	;;
+   *)
+ 	echo "Usage: nfs {start|stop|reload}"

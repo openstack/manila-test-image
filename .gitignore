@@ -1,0 +1,5 @@
+output*
+overlay*
+buildroot
+download
+*.qcow2

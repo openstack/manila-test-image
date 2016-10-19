@@ -1,0 +1,1 @@
+/share *(rw,sync,no_subtree_check,all_squash,anonuid=99,anongid=99)

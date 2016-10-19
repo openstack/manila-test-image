@@ -1,0 +1,157 @@
+
+##### Fedora #####
+
+alias virsh="virsh --connect qemu:///system"
+
+##### To create the test environment #####
+
+# Update these as needed
+CLIENT_QCOW=$PWD/client.qcow2
+SERVER_QCOW=$PWD/server.qcow2
+
+cat << EOF > /tmp/manila-test-net.xml
+<network>
+  <name>manila-test-net</name>
+  <mac address='52:54:00:00:32:01'/>
+  <domain name='manila-testnet'/>
+  <ip address='192.168.32.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.32.2' end='192.168.32.10'/>
+      <host mac='52:54:00:00:32:02' name='server' ip='192.168.32.2'/>
+      <host mac='52:54:00:00:32:03' name='client' ip='192.168.32.3'/>
+    </dhcp>
+  </ip>
+</network>
+EOF
+
+virsh net-define /tmp/manila-test-net.xml
+
+cat << EOF > /tmp/manila-test-client.xml
+<domain type='kvm'>
+  <name>manila-test-client</name>
+  <memory unit='MiB'>64</memory>
+  <currentMemory unit='MiB'>64</currentMemory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+  </features>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='$CLIENT_QCOW'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <interface type='network'>
+      <mac address='52:54:00:00:32:03'/>
+      <source network='manila-test-net'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <graphics type='vnc' port='-1' autoport='yes'/>
+    <video>
+      <model type='vmvga' vram='1024' heads='1'/>
+    </video>
+  </devices>
+</domain>
+EOF
+
+virsh define /tmp/manila-test-client.xml
+
+cat << EOF > /tmp/manila-test-server.xml
+<domain type='kvm'>
+  <name>manila-test-server</name>
+  <memory unit='MiB'>128</memory>
+  <currentMemory unit='MiB'>128</currentMemory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+  </features>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='$SERVER_QCOW'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <interface type='network'>
+      <mac address='52:54:00:00:32:02'/>
+      <source network='manila-test-net'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <graphics type='vnc' port='-1' autoport='yes'/>
+    <video>
+      <model type='vmvga' vram='1024' heads='1'/>
+    </video>
+  </devices>
+</domain>
+EOF
+
+virsh define /tmp/manila-test-server.xml
+
+##### To start the test environment #####
+
+virsh net-start manila-test-net
+virsh start manila-test-server
+virsh start manila-test-client
+
+##### To run basic tests #####
+
+export SSHPASS=root
+SSH="sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+$SSH root@192.168.32.3 << EOF
+umask 2
+mkdir -p /mnt/nfs3 /mnt/nfs4 /mnt/cifs
+mount -t nfs -o vers=3 192.168.32.2:/share /mnt/nfs3
+mount.nfs4 192.168.32.2:/share /mnt/nfs4
+mount -t cifs -o username=guest //192.168.32.2/share /mnt/cifs
+echo Hello NFS3 > /mnt/nfs3/test3
+echo Hello NFS4 > /mnt/nfs4/test4
+echo Hello CIFS > /mnt/cifs/test
+cat /mnt/nfs3/test3
+cat /mnt/nfs4/test4
+cat /mnt/cifs/test
+umount /mnt/nfs3
+umount /mnt/nfs4
+umount /mnt/cifs
+EOF
+
+$SSH root@192.168.32.2 cat /share/*
+
+##### To stop the test environment #####
+
+virsh destroy manila-test-server
+virsh destroy manila-test-client
+virsh net-destroy manila-test-net
+
+##### To clean up test environment #####
+
+virsh undefine manila-test-server
+virsh undefine manila-test-client
+virsh net-undefine manila-test-net

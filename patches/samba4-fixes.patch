@@ -1,0 +1,47 @@
+This patch fixes some thing which cause problems started up
+Samba. One of the changes prevents gnutls from using the new
+getrandom() syscall which blocks for a painfully long time.
+This reduces startup times from 90 seconds to 3 seconds.
+The other change alters the library path for samba to
+include /usr/lib/samba.
+
+Index: buildroot/package/gnutls/0001-disable-getrandom.patch
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ buildroot/package/gnutls/0001-disable-getrandom.patch	2016-06-03 16:25:15.793497305 -0400
+@@ -0,0 +1,16 @@
++Index: gnutls-3.4.9/lib/nettle/rnd-common.c
++===================================================================
++--- gnutls-3.4.9.orig/lib/nettle/rnd-common.c	2016-06-03 23:03:07.143580523 -0400
+++++ gnutls-3.4.9/lib/nettle/rnd-common.c	2016-06-03 23:03:13.743547820 -0400
++@@ -37,11 +37,6 @@
++ #include <rnd-common.h>
++ #include <hash-pjw-bare.h>
++ 
++-#if defined(HAVE_LINUX_GETRANDOM)
++-# include <linux/random.h>
++-# define getentropy(x, size) getrandom(x, size, 0)
++-# define HAVE_GETENTROPY
++-#endif
++ #include <sys/types.h>
++ #include <sys/stat.h>
++ #include <unistd.h>
+
+Index: buildroot/package/samba4/S91smb
+===================================================================
+--- buildroot.orig/package/samba4/S91smb	2016-03-01 15:47:30.000000000 -0500
++++ buildroot/package/samba4/S91smb	2016-05-22 14:46:43.258631078 -0400
+@@ -6,11 +6,11 @@
+ 
+ start() {
+ 	printf "Starting SMB services: "
+-	smbd -D
++	LD_LIBRARY_PATH=/usr/lib/samba smbd -D
+ 	[ $? = 0 ] && echo "OK" || echo "FAIL"
+ 
+ 	printf "Starting NMB services: "
+-	nmbd -D
++	LD_LIBRARY_PATH=/usr/lib/samba nmbd -D
+ 	[ $? = 0 ] && echo "OK" || echo "FAIL"
+ }
+ 

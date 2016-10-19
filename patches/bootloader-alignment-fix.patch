@@ -1,0 +1,31 @@
+This patch fixes a linker aligmnent bug which occurs with recent
+versions of GCC.
+
+Index: buildroot/boot/syslinux/0001-gcc-alignment.patch
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ buildroot/boot/syslinux/0001-gcc-alignment.patch	2016-09-23 21:41:25.765834379 -0400
+@@ -0,0 +1,22 @@
++
++Index: core/i386/syslinux.ld
++===================================================================
++--- a/core/i386/syslinux.ld	2016-09-23 21:36:47.846326935 -0400
+++++ b/core/i386/syslinux.ld	2016-09-23 21:36:47.846326935 -0400
++@@ -266,7 +266,7 @@
++ 		__text_end = .;
++ 	}
++ 
++-	. = ALIGN(16);
+++	. = ALIGN(32);
++ 
++ 	__rodata_vma = .;
++ 	__rodata_lma = __rodata_vma + __text_lma - __text_vma;
++@@ -361,7 +361,7 @@
++ 		__dynamic_end = .;
++ 	}
++ 
++-	. = ALIGN(16);
+++	. = ALIGN(32);
++ 
++ 	__data_vma = .;
++ 	__data_lma = __data_vma + __text_lma - __text_vma;
