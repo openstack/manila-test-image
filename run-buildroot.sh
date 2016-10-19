@@ -66,12 +66,6 @@ rm configs/manila_*_defconfig
 for IMAGE in $BUILD_IMAGES
 do
 	make O=../output-${IMAGE} all
+	( cd .. ; ./make-bootable-disk.sh $IMAGE )
 done
 
-cd ..
-
-# Do the builds
-for IMAGE in $BUILD_IMAGES
-do
-	./make-bootable-disk.sh$ IMAGE
-done
