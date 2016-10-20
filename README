@@ -14,17 +14,23 @@ The following extra features are enabled:
 * Samba4 Server
 * CIFS client
 
-== Dependencies needed to build ==
+== Dependencies needed ==
 
 On Ubuntu:
 
+ # To build
  sudo apt-get -y install bison flex texinfo gettext ncurses-dev unzip \
-     sshpass quilt qt-sdk qemu-kvm build-essential gcc-multilib
+     bc python quilt build-essential gcc-multilib qemu-utils
+ # For test/dev
+ sudo apt-get -y sshpass qt-sdk qemu-kvm
 
 On Fedora:
 
+ # To build
  sudo dnf -y install bison flex texinfo gettext ncurses-devel unzip \
-     sshpass quilt qt-devel qemu-kvm gcc-c++ make glibc-devel.i686
+     bc python quilt gcc-c++ make glibc-devel.i686 qemu-img
+ # For test/dev
+ sudo apt-get -y sshpass qt-devel qemu-kvm
 
 == Building the images ==
 
