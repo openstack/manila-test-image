@@ -19,8 +19,8 @@ The following extra features are enabled:
 On Ubuntu:
 
  # To build
- sudo apt-get -y install unzip bc python quilt build-essential \
-     gcc-multilib qemu-utils
+ sudo apt-get -y install unzip bc python quilt parted qemu-utils \
+     build-essential gcc-multilib
  # For test/dev
  sudo apt-get -y bison flex texinfo gettext ncurses-dev sshpass \
      qt-sdk qemu-kvm
@@ -28,8 +28,8 @@ On Ubuntu:
 On Fedora:
 
  # To build
- sudo dnf -y install unzip bc python quilt gcc-c++ make \
-     glibc-devel.i686 qemu-img
+ sudo dnf -y install unzip bc python quilt parted qemu-img gcc-c++ \
+     make glibc-devel.i686
  # For test/dev
  sudo apt-get -y bison flex texinfo gettext ncurses-devel sshpass \
      qt-devel qemu-kvm
