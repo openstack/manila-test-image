@@ -3,3 +3,8 @@ overlay*
 buildroot
 download
 *.qcow2
+.tox
+AUTHORS
+ChangeLog
+.eggs
+*.egg-info
