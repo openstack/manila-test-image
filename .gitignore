@@ -8,3 +8,4 @@ AUTHORS
 ChangeLog
 .eggs
 *.egg-info
+publish-image.sh
