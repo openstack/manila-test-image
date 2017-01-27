@@ -2,9 +2,9 @@
 
 mkdir -p /root/.ssh
 cd /root/.ssh
-chown 700 .
+chmod 700 .
 [ -f authorized_keys ] || touch authorized_keys
-chown 600 authorized_keys
+chmod 600 authorized_keys
 
 url="http://169.254.169.254/2009-04-04/meta-data"
 (
