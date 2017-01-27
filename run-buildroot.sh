@@ -9,17 +9,30 @@
 
 ./init-buildroot.sh
 
+# Grab JSON.sh for json parsing
+JSON_VERS=e05e69a0debdba68125a33ac786726cb860b2e7b
+JSON_SH=https://raw.githubusercontent.com/dominictarr/JSON.sh/$JSON_VERS/JSON.sh
+if [ ! -x download/JSON.sh ]
+then
+	curl -s $JSON_SH > download/JSON.sh
+	chmod +x download/JSON.sh
+fi
+
 # Create the filesystem overlays
 if [ ! -d overlay-client ]
 then
 	mkdir overlay-client
 	cp -a common-files/* overlay-client
+	mkdir -p overlay-client/usr/bin
+	cp download/JSON.sh overlay-server/usr/bin
 fi
 if [ ! -d overlay-server ]
 then
 	mkdir overlay-server
 	cp -a common-files/* overlay-server
 	cp -a server-files/* overlay-server
+	mkdir -p overlay-server/usr/bin
+	cp download/JSON.sh overlay-server/usr/bin
 fi
 
 # Copy the config files where they need to go (temporarily)
@@ -45,4 +58,3 @@ do
 	make O=../output-${IMAGE} all
 	( cd .. ; ./make-bootable-disk.sh $IMAGE )
 done
-
