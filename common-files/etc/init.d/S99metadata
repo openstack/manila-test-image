@@ -17,7 +17,8 @@ check_net() {
 json_metadata() {
     F=$1/ec2/2009-04-04/meta-data.json
     [ -f $F ] || return
-    JSON.sh < $F | sed -n 's/^\["public-keys","[0-9]\+","openssh-key"\]\t"\(.*\)\\n"$/\1/p'
+    SCRIPT='s/^\["public-keys","[0-9]\+","openssh-key"\]\t"\(.*\)\\n"$/\1/p'
+    JSON.sh < $F | sed -n "$SCRIPT"
 }
 
 check_cd() {
