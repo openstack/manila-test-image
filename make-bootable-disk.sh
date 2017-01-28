@@ -10,8 +10,7 @@
 DISK_NAME=$1
 BR_OUTPUT=output-$1
 
-if [ -z "$DISK_NAME" ]
-then
+if [ -z "$DISK_NAME" ] ; then
     echo Specify disk name
     exit 2
 fi
@@ -52,8 +51,7 @@ sudo tar -C $MOUNT -xf $BR_OUTPUT/images/rootfs.tar
 echo Installing syslinux
 sudo $BR_OUTPUT/host/sbin/extlinux -z --install $MOUNT/boot
 
-if [ $DISK_NAME = server ]
-then
+if [ $DISK_NAME = server ] ; then
     echo Creating share dir
     SHARE_DIR=$MOUNT/share
     sudo mkdir -p $SHARE_DIR
