@@ -1,35 +1,35 @@
 #!/bin/sh
 
 check_net() {
-	url="http://169.254.169.254/2009-04-04/meta-data"
-	(
-		wget -q -O - -T 10 $url/public-keys 2> /dev/null || exit 1
-		echo
-	) | (
-		while read line
-		do
-		key=$(echo $line | sed 's/\([0-9]\+\)=.*/\1/')
-		key_url=$url/public-keys/$key/openssh-key
-		wget -q -O - -T 10 $key_url 2> /dev/null || exit 1
-		done
-	) >> authorized_keys
+    url="http://169.254.169.254/2009-04-04/meta-data"
+    (
+        wget -q -O - -T 10 $url/public-keys 2> /dev/null || exit 1
+        echo
+    ) | (
+        while read line
+        do
+        key=$(echo $line | sed 's/\([0-9]\+\)=.*/\1/')
+        key_url=$url/public-keys/$key/openssh-key
+        wget -q -O - -T 10 $key_url 2> /dev/null || exit 1
+        done
+    ) >> authorized_keys
 }
 
 json_metadata() {
-	F=$1/ec2/2009-04-04/meta-data.json
-	[ -f $F ] || return
-	JSON.sh < $F | sed -n 's/^\["public-keys","[0-9]\+","openssh-key"\]\t"\(.*\)\\n"$/\1/p'
+    F=$1/ec2/2009-04-04/meta-data.json
+    [ -f $F ] || return
+    JSON.sh < $F | sed -n 's/^\["public-keys","[0-9]\+","openssh-key"\]\t"\(.*\)\\n"$/\1/p'
 }
 
 check_cd() {
-	[ -b /dev/sr0 ] || return
-	mkdir /tmp/cd
-	if mount /dev/sr0 /tmp/cd
-	then
-		json_metadata /tmp/cd >> authorized_keys
-		umount /tmp/cd
-	fi
-	rmdir /tmp/cd
+    [ -b /dev/sr0 ] || return
+    mkdir /tmp/cd
+    if mount /dev/sr0 /tmp/cd
+    then
+        json_metadata /tmp/cd >> authorized_keys
+        umount /tmp/cd
+    fi
+    rmdir /tmp/cd
 }
 
 mkdir -p /root/.ssh

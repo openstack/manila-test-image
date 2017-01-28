@@ -14,25 +14,25 @@ JSON_VERS=e05e69a0debdba68125a33ac786726cb860b2e7b
 JSON_SH=https://raw.githubusercontent.com/dominictarr/JSON.sh/$JSON_VERS/JSON.sh
 if [ ! -x download/JSON.sh ]
 then
-	curl -s $JSON_SH > download/JSON.sh
-	chmod +x download/JSON.sh
+    curl -s $JSON_SH > download/JSON.sh
+    chmod +x download/JSON.sh
 fi
 
 # Create the filesystem overlays
 if [ ! -d overlay-client ]
 then
-	mkdir overlay-client
-	cp -a common-files/* overlay-client
-	mkdir -p overlay-client/usr/bin
-	cp download/JSON.sh overlay-server/usr/bin
+    mkdir overlay-client
+    cp -a common-files/* overlay-client
+    mkdir -p overlay-client/usr/bin
+    cp download/JSON.sh overlay-server/usr/bin
 fi
 if [ ! -d overlay-server ]
 then
-	mkdir overlay-server
-	cp -a common-files/* overlay-server
-	cp -a server-files/* overlay-server
-	mkdir -p overlay-server/usr/bin
-	cp download/JSON.sh overlay-server/usr/bin
+    mkdir overlay-server
+    cp -a common-files/* overlay-server
+    cp -a server-files/* overlay-server
+    mkdir -p overlay-server/usr/bin
+    cp download/JSON.sh overlay-server/usr/bin
 fi
 
 # Copy the config files where they need to go (temporarily)
@@ -46,7 +46,7 @@ BUILD_IMAGES="client server"
 # Setup the build directories with their configs
 for IMAGE in $BUILD_IMAGES
 do
-	make O=../output-${IMAGE} manila_${IMAGE}_defconfig
+    make O=../output-${IMAGE} manila_${IMAGE}_defconfig
 done
 
 # Remove the temporary configs
@@ -55,6 +55,6 @@ rm configs/manila_*_defconfig
 # Do the builds
 for IMAGE in $BUILD_IMAGES
 do
-	make O=../output-${IMAGE} all
-	( cd .. ; ./make-bootable-disk.sh $IMAGE )
+    make O=../output-${IMAGE} all
+    ( cd .. ; ./make-bootable-disk.sh $IMAGE )
 done

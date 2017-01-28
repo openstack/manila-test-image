@@ -12,8 +12,8 @@ BR_OUTPUT=output-$1
 
 if [ -z "$DISK_NAME" ]
 then
-	echo Specify disk name
-	exit 2
+    echo Specify disk name
+    exit 2
 fi
 
 SIZE=120m
@@ -54,11 +54,11 @@ sudo $BR_OUTPUT/host/sbin/extlinux -z --install $MOUNT/boot
 
 if [ $DISK_NAME = server ]
 then
-	echo Creating share dir
-	SHARE_DIR=$MOUNT/share
-	sudo mkdir -p $SHARE_DIR
-	sudo chmod 770 $SHARE_DIR
-	sudo chown 99:99 $SHARE_DIR
+    echo Creating share dir
+    SHARE_DIR=$MOUNT/share
+    sudo mkdir -p $SHARE_DIR
+    sudo chmod 770 $SHARE_DIR
+    sudo chown 99:99 $SHARE_DIR
 fi
 
 echo Unmounting filesystem
