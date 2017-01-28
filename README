@@ -19,19 +19,19 @@ The following extra features are enabled:
 On Ubuntu:
 
  # To build
- sudo apt-get -y install unzip bc python quilt parted qemu-utils \
+ sudo apt-get -y install curl unzip bc python quilt parted qemu-utils \
      build-essential gcc-multilib
  # For test/dev
- sudo apt-get -y bison flex texinfo gettext ncurses-dev sshpass \
+ sudo apt-get -y install bison flex texinfo gettext ncurses-dev sshpass \
      qt-sdk qemu-kvm
 
 On Fedora:
 
  # To build
- sudo dnf -y install unzip bc python quilt parted qemu-img gcc-c++ \
+ sudo dnf -y install curl unzip bc python quilt parted qemu-img gcc-c++ \
      make glibc-devel.i686
  # For test/dev
- sudo apt-get -y bison flex texinfo gettext ncurses-devel sshpass \
+ sudo dnf -y install bison flex texinfo gettext ncurses-devel sshpass \
      qt-devel qemu-kvm
 
 == Building the images ==
