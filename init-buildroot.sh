@@ -7,6 +7,11 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+if which lsb_release 2> /dev/null && [ $(lsb_release -i -s) = "Ubuntu" ]
+then
+	sudo apt-get -y install curl unzip bc python quilt parted qemu-utils \
+		build-essential gcc-multilib
+fi
 
 VERSION=2016.02
 FILENAME=buildroot-${VERSION}.tar.bz2
