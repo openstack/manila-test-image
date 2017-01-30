@@ -23,7 +23,7 @@ On Ubuntu:
      build-essential gcc-multilib
  # For test/dev
  sudo apt-get -y install bison flex texinfo gettext ncurses-dev sshpass \
-     qt-sdk qemu-kvm
+     qt-sdk qemu-kvm genisoimage
 
 On Fedora:
 
@@ -32,7 +32,7 @@ On Fedora:
      make glibc-devel.i686
  # For test/dev
  sudo dnf -y install bison flex texinfo gettext ncurses-devel sshpass \
-     qt-devel qemu-kvm
+     qt-devel qemu-kvm genisoimage
 
 == Building the images ==
 

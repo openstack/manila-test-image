@@ -22,7 +22,7 @@ json_metadata() {
 }
 
 check_cd() {
-    [ -b /dev/sr0 ] || return
+    blkid /dev/sr0 | grep config-2 > /dev/null || return
     mkdir /tmp/cd
     if mount /dev/sr0 /tmp/cd ; then
         json_metadata /tmp/cd >> authorized_keys
@@ -37,5 +37,5 @@ chmod 700 .
 [ -f authorized_keys ] || touch authorized_keys
 chmod 600 authorized_keys
 
-check_net
 check_cd
+check_net &
