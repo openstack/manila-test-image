@@ -23,14 +23,12 @@ fi
 if [ ! -d overlay-client ] ; then
     mkdir overlay-client
     cp -a common-files/* overlay-client
-    mkdir -p overlay-client/usr/bin
     cp $JSON_SH overlay-client/usr/bin
 fi
 if [ ! -d overlay-server ] ; then
     mkdir overlay-server
     cp -a common-files/* overlay-server
     cp -a server-files/* overlay-server
-    mkdir -p overlay-server/usr/bin
     cp $JSON_SH overlay-server/usr/bin
 fi
 
