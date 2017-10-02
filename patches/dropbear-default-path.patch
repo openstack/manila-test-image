@@ -1,0 +1,21 @@
+Modify the default path of dropbear to include /sbin and /usr/sbin.
+
+Index: buildroot/package/dropbear/0001-defaultpath.patch
+===================================================================
+--- /dev/null	1969-12-31 19:00:00.000000000 -0500
++++ buildroot/package/dropbear/0001-defaultpath.patch	2017-10-02 13:32:32.197369170 -0400
+@@ -0,0 +1,13 @@
++diff -Naur a/options.h b/options.h
++--- a/options.h	2017-10-02 10:40:56.591817649 -0400
+++++ b/options.h	2017-10-02 13:31:45.493262641 -0400
++@@ -342,7 +342,7 @@
++ #define DEFAULT_IDLE_TIMEOUT 0
++ 
++ /* The default path. This will often get replaced by the shell */
++-#define DEFAULT_PATH "/usr/bin:/bin"
+++#define DEFAULT_PATH "/usr/bin:/bin:/usr/sbin:/sbin"
++ 
++ /* Some other defines (that mostly should be left alone) are defined
++  * in sysoptions.h */
++
+
