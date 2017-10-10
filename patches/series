@@ -2,3 +2,4 @@ nfs-utils-enable-nfsv4.patch
 samba4-fixes.patch
 bootloader-alignment-fix.patch
 dropbear-default-path.patch
+skeleton-profile-ps1.patch
