@@ -1,0 +1,13 @@
+#!/bin/sh -e
+# manila-cifs-create <cookie>
+
+NUM=$1
+
+MNT_PATH=/shares/$NUM
+SHARE=share_$NUM
+net conf addshare $SHARE $MNT_PATH writeable=y guest_ok=y
+net conf setparm $SHARE browseable yes
+net conf setparm $SHARE "create mask" 0755
+net conf setparm $SHARE "directory mask" 0755
+
+echo $SHARE

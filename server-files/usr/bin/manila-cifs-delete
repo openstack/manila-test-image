@@ -1,0 +1,7 @@
+#!/bin/sh -e
+# manila-cifs-delete <cookie>
+
+NUM=$1
+
+SHARE=share_$NUM
+net conf delshare $SHARE

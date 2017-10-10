@@ -1,0 +1,10 @@
+#!/bin/sh -e
+# manila-unmount <cookie>
+
+NUM=$1
+
+UUID=$(cat /metadata/$NUM/UUID)
+MNT_PATH=$(grep $UUID /etc/fstab | awk '{print $2}')
+sed /$UUID/d -i /etc/fstab
+umount $MNT_PATH
+rmdir $MNT_PATH

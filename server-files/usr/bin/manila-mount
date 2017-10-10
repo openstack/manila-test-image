@@ -1,0 +1,32 @@
+#!/bin/sh -e
+# manila-mount <device-path> <share-uuid>
+
+DEVICE=$1
+UUID=$2
+
+tune2fs -U $UUID $DEVICE > /dev/null
+mkdir -p /shares
+chmod 775 /shares
+
+while true
+do
+	last=$(cd /shares ; ls | sort -n | tail -n 1)
+	NUM=$((last+1))
+	MNT_PATH=/shares/$NUM
+	if mkdir $MNT_PATH
+	then
+		break
+	else
+		sleep 1
+	fi
+done
+
+chmod 000 $MNT_PATH
+
+mkdir -p /metadata/$NUM
+echo $UUID > /metadata/$NUM/UUID
+
+echo UUID=$UUID $MNT_PATH ext2 rw 0 2 >> /etc/fstab
+mount -a
+chmod 775 $MNT_PATH
+echo $NUM

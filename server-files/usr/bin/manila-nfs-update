@@ -1,0 +1,9 @@
+#!/bin/sh -e
+# manila-nfs-update <cookie> <exports-file>
+
+NUM=$1
+EXPORTS_FILE=$2
+
+EXPORTS_FILE2=/etc/exports.d/$NUM.exports
+mv -f $EXPORTS_FILE $EXPORTS_FILE2
+exportfs -r

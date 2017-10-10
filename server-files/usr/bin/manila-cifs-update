@@ -1,0 +1,14 @@
+#!/bin/sh -e
+# manila-cifs-update <cookie> <parms-file>
+
+NUM=$1
+PARMS_FILE=$2
+
+SHARE=share_$NUM
+cat $PARMS_FILE | while read line
+do
+	PARAM=$(echo $line | sed 's/\([^=]*\)=.*/\1/' | awk '{$1=$1;print}')
+	VALUE=$(echo $line | sed 's/.*=\([^=]*\)/\1/' | awk '{$1=$1;print}')
+	net conf setparm $SHARE "$PARAM" "$VALUE"
+done
+rm $PARMS_FILE

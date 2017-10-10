@@ -1,0 +1,16 @@
+#!/bin/sh -e
+# manila-cifs-resume <cookie>
+
+NUM=$1
+
+MNT_PATH=/shares/$NUM
+SHARE=share_$NUM
+net conf addshare $SHARE $MNT_PATH writeable=y guest_ok=y
+PARMS_FILE=/metadata/$NUM/offline.parms
+cat $PARMS_FILE | while read line
+do
+	PARAM=$(echo $line | sed 's/\([^=]*\)=.*/\1/' | awk '{$1=$1;print}')
+	VALUE=$(echo $line | sed 's/.*=\([^=]*\)/\1/' | awk '{$1=$1;print}')
+	net conf setparm $SHARE "$PARAM" "$VALUE"
+done
+rm $PARMS_FILE

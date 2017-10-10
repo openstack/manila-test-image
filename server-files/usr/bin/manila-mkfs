@@ -1,0 +1,11 @@
+#!/bin/sh -e
+# manila-mkfs <device-path>
+
+DEVICE=$1
+
+while [ ! -b $DEVICE ]
+do
+	sleep 1
+done
+
+mkfs.ext2 $DEVICE > /dev/null

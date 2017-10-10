@@ -1,0 +1,7 @@
+#!/bin/sh -e
+# manila-nfs-delete <cookie>
+
+NUM=$1
+
+rm -f /etc/exports.d/$NUM.exports
+exportfs -r

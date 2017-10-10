@@ -1,0 +1,10 @@
+#!/bin/sh -e
+# manila-pre-extend <cookie>
+
+NUM=$1
+
+UUID=$(cat /metadata/$NUM/UUID)
+sed "/$UUID/d" -i /etc/fstab
+
+MNT_PATH=/shares/$NUM
+umount $MNT_PATH

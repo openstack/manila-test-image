@@ -1,0 +1,11 @@
+#!/bin/sh -e
+# manila-nfs-create <cookie>
+
+NUM=$1
+
+mkdir -p /etc/exports.d
+EXPORTS_FILE=/etc/exports.d/$NUM.exports
+rm -f $EXPORTS_FILE
+touch $EXPORTS_FILE
+
+echo /shares/$NUM

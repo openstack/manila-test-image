@@ -1,0 +1,7 @@
+#!/bin/sh -e
+# manila-init
+
+if ! pdbedit -L | grep root
+then
+	printf "root\nroot\n" | smbpasswd -a -s root
+fi

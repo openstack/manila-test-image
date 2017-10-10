@@ -1,0 +1,8 @@
+#!/bin/sh -e
+# manila-cifs-suspend <cookie>
+
+NUM=$1
+
+SHARE=share_$NUM
+net conf showshare $SHARE | sed '/^\[/d' > /metadata/$NUM/offline.parms
+net conf delshare $SHARE

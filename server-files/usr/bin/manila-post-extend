@@ -1,0 +1,13 @@
+#!/bin/sh -e
+# manila-post-extend <cookie> <device-path>
+
+NUM=$1
+DEVICE=$2
+
+e2fsck -pf $DEVICE
+resize2fs $DEVICE
+
+UUID=$(cat /metadata/$NUM/UUID)
+MNT_PATH=/shares/$NUM
+echo UUID=$UUID $MNT_PATH ext2 rw 0 2 >> /etc/fstab
+mount -a

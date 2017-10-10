@@ -1,0 +1,7 @@
+#!/bin/sh -e
+# manila-nfs-resume <cookie>
+
+NUM=$1
+
+mv /metadata/$NUM/offline.exports /etc/exports.d/$NUM.exports
+exportfs -r
