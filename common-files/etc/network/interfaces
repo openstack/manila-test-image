@@ -8,3 +8,10 @@ iface eth0 inet dhcp
 iface eth0 inet6 manual
     up dhcpcd -b -6 eth0
     down kill `cat /var/run/dhcpcd-eth0-6.pid` 2>/dev/null
+
+auto eth1
+iface eth1 inet dhcp
+
+iface eth1 inet6 manual
+    up dhcpcd -b -6 eth1
+    down kill `cat /var/run/dhcpcd-eth1-6.pid` 2>/dev/null

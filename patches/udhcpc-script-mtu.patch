@@ -1,0 +1,21 @@
+Index: buildroot/package/busybox/udhcpc.script
+===================================================================
+--- buildroot.orig/package/busybox/udhcpc.script	2017-10-14 14:55:16.374784277 -0400
++++ buildroot/package/busybox/udhcpc.script	2017-10-14 14:55:32.934958126 -0400
+@@ -8,6 +8,7 @@
+ [ -e $RESOLV_CONF ] || touch $RESOLV_CONF
+ [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+ [ -n "$subnet" ] && NETMASK="netmask $subnet"
++[ -n "$mtu" ] && MTU="mtu $mtu" || MTU="mtu 1500"
+ 
+ case "$1" in
+ 	deconfig)
+@@ -36,7 +37,7 @@
+ 		if [ -x /usr/sbin/avahi-autoipd ]; then
+ 			/usr/sbin/avahi-autoipd -k $interface
+ 		fi
+-		/sbin/ifconfig $interface $ip $BROADCAST $NETMASK
++		/sbin/ifconfig $interface $ip $BROADCAST $NETMASK $MTU
+ 
+ 		if [ -n "$router" ] ; then
+ 			echo "deleting routers"
