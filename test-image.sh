@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -xe
 
 CONFIG_DIR=/tmp/configdir
 CONFIG_ISO=/tmp/configdrive.iso

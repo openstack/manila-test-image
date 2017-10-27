@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -xe
 #
 # Copyright 2016 (C) NetApp, Inc.
 # Author: Ben Swartzlander <ben@swartzlander.org>
