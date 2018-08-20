@@ -1,0 +1,10 @@
+- project:
+    check:
+      jobs:
+        - openstack-tox-bashate
+    gate:
+      jobs:
+        - openstack-tox-bashate
+    experimental:
+      jobs:
+        - legacy-manila-test-image-build
