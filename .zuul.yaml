@@ -1,3 +1,9 @@
+- job:
+    name: manila-test-image-build
+    parent: legacy-base
+    run: playbooks/manila-test-image-build/run.yaml
+    timeout: 3600
+
 - project:
     check:
       jobs:
@@ -7,4 +13,4 @@
         - openstack-tox-bashate
     experimental:
       jobs:
-        - legacy-manila-test-image-build
+        - manila-test-image-build
