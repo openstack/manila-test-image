@@ -1,8 +1,10 @@
 - job:
     name: manila-test-image-build
-    parent: legacy-base
+    parent: unittests
+    required-projects:
+      - openstack/manila-test-image
     run: playbooks/manila-test-image-build/run.yaml
-    timeout: 3600
+    timeout: 1800
 
 - project:
     check:
