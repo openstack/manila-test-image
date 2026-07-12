@@ -1,6 +1,33 @@
 - hosts: all
   tasks:
-    - name:  Build manila-test-image
+    - name: Install build dependencies
+      become: true
+      package:
+        name:
+          - curl
+          - unzip
+          - bc
+          - python3
+          - quilt
+          - parted
+          - qemu-utils
+          - build-essential
+        state: present
+
+    - name: Build manila-test-image
       command: bash -xe ./run-buildroot.sh
       args:
         chdir: '{{ zuul.project.src_dir }}'
+      environment:
+        FORCE_UNSAFE_CONFIGURE: '1'
+
+    - name: Create images output directory
+      file:
+        path: '{{ zuul.project.src_dir }}/images'
+        state: directory
+
+    - name: Copy built image to images directory
+      copy:
+        src: '{{ zuul.project.src_dir }}/client.qcow2'
+        dest: '{{ zuul.project.src_dir }}/images/manila-test-image-client.qcow2'
+        remote_src: true

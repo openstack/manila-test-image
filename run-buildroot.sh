@@ -25,20 +25,15 @@ if [ ! -d overlay-client ] ; then
     cp -a common-files/* overlay-client
     cp $JSON_SH overlay-client/usr/bin
 fi
-if [ ! -d overlay-server ] ; then
-    mkdir overlay-server
-    cp -a common-files/* overlay-server
-    cp -a server-files/* overlay-server
-    cp $JSON_SH overlay-server/usr/bin
-fi
 
 # Copy the config files where they need to go (temporarily)
 cp conf/buildroot-client.config buildroot/configs/manila_client_defconfig
-cp conf/buildroot-server.config buildroot/configs/manila_server_defconfig
-cp conf/buildroot-debug.config buildroot/configs/manila_debug_defconfig
 
 cd buildroot
-BUILD_IMAGES="client server"
+BUILD_IMAGES="client"
+
+# Allow building as root (common in CI/containers)
+export FORCE_UNSAFE_CONFIGURE=1
 
 # Setup the build directories with their configs
 for IMAGE in $BUILD_IMAGES ; do

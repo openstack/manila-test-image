@@ -1,18 +1,34 @@
 - job:
     name: manila-test-image-build
     parent: unittests
+    description: |
+      Build the manila-test-image client qcow2.
     required-projects:
       - openstack/manila-test-image
     run: playbooks/manila-test-image-build/run.yaml
-    timeout: 1800
+    timeout: 3600
+
+- job:
+    name: manila-test-image-publish-artifacts
+    parent: publish-openstack-artifacts
+    description: |
+      Build and publish manila-test-image to tarballs.opendev.org.
+    final: true
+    required-projects:
+      - openstack/manila-test-image
+    run: playbooks/manila-test-image-build/run.yaml
+    post-run: playbooks/manila-test-image-publish/post.yaml
+    timeout: 3600
 
 - project:
     check:
       jobs:
         - openstack-tox-bashate
+        - manila-test-image-build
     gate:
       jobs:
         - openstack-tox-bashate
-    experimental:
-      jobs:
         - manila-test-image-build
+    post:
+      jobs:
+        - manila-test-image-publish-artifacts

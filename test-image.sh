@@ -15,14 +15,14 @@ mkisofs -R -V config-2 -o $CONFIG_ISO $CONFIG_DIR 2> /dev/null
 rm -rf $CONFIG_DIR
 
 # Create temporary overlay
-qemu-img create -f qcow2 -b $(pwd)/client.qcow2 $TEST_IMG
+qemu-img create -f qcow2 -b $(pwd)/client.qcow2 -F qcow2 $TEST_IMG
 
 # Test the image
-KVM=kvm
+KVM=qemu-system-x86_64
 if ! which $KVM 2> /dev/null ; then
-    KVM=qemu-kvm
+    KVM=kvm
 fi
-$KVM -m 64 -monitor none -nographic \
+$KVM -m 64 -enable-kvm -monitor none -nographic \
     -drive file=$TEST_IMG,if=virtio,format=qcow2 \
     -netdev user,id=net0 -device virtio-net-pci,netdev=net0 \
     -cdrom $CONFIG_ISO
