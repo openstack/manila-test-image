@@ -6,7 +6,7 @@
     required-projects:
       - openstack/manila-test-image
     run: playbooks/manila-test-image-build/run.yaml
-    timeout: 3600
+    timeout: 5400
 
 - job:
     name: manila-test-image-publish-artifacts
@@ -18,7 +18,7 @@
       - openstack/manila-test-image
     run: playbooks/manila-test-image-build/run.yaml
     post-run: playbooks/manila-test-image-publish/post.yaml
-    timeout: 3600
+    timeout: 5400
 
 - project:
     check:
