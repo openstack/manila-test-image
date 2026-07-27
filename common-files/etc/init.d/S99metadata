@@ -17,14 +17,14 @@ check_net() {
 json_metadata() {
     F=$1/ec2/2009-04-04/meta-data.json
     [ -f $F ] || return
-    SCRIPT='s/^\["public-keys","[0-9]\+","openssh-key"\]\t"\(.*\)\\n"$/\1/p'
+    SCRIPT='s/^\["public-keys","[0-9]\+","openssh-key"\]\t"\(.*\)"$/\1/p'
     JSON.sh < $F | sed -n "$SCRIPT"
 }
 
 check_cd() {
-    blkid /dev/sr0 | grep config-2 > /dev/null || return
+    [ -b /dev/sr0 ] || return
     mkdir /tmp/cd
-    if mount /dev/sr0 /tmp/cd ; then
+    if mount /dev/sr0 /tmp/cd 2>/dev/null ; then
         json_metadata /tmp/cd >> authorized_keys
         umount /tmp/cd
     fi
@@ -38,4 +38,4 @@ chmod 700 .
 chmod 600 authorized_keys
 
 check_cd
-check_net &
+check_net
