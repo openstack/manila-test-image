@@ -1,0 +1,83 @@
+#!/bin/sh
+# Minimal crudini replacement for INI file manipulation.
+# Supports: crudini --set file section key [value]
+
+set -e
+
+case "$1" in
+    --set)
+        shift
+        ;;
+    *)
+        echo "Usage: crudini --set file section key [value]" >&2
+        exit 1
+        ;;
+esac
+
+file="$1"
+section="$2"
+key="$3"
+value="$4"
+
+if [ -z "$file" ] || [ -z "$section" ] || [ -z "$key" ]; then
+    echo "Usage: crudini --set file section key [value]" >&2
+    exit 1
+fi
+
+if [ -n "$value" ]; then
+    line="$key = $value"
+else
+    line="$key"
+fi
+
+if [ ! -f "$file" ]; then
+    printf '[%s]\n%s\n' "$section" "$line" > "$file"
+    exit 0
+fi
+
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+
+found_section=0
+key_written=0
+
+while IFS= read -r cur || [ -n "$cur" ]; do
+    case "$cur" in
+        "[$section]")
+            found_section=1
+            printf '%s\n' "$cur" >> "$tmpfile"
+            ;;
+        \[*\])
+            if [ "$found_section" -eq 1 ] && [ "$key_written" -eq 0 ]; then
+                printf '%s\n' "$line" >> "$tmpfile"
+                key_written=1
+            fi
+            found_section=0
+            printf '%s\n' "$cur" >> "$tmpfile"
+            ;;
+        *)
+            if [ "$found_section" -eq 1 ]; then
+                cur_key=$(printf '%s' "$cur" | sed -n 's/^\(.*[^ ]\) *=.*/\1/p')
+                if [ "$cur_key" = "$key" ]; then
+                    printf '%s\n' "$line" >> "$tmpfile"
+                    key_written=1
+                else
+                    printf '%s\n' "$cur" >> "$tmpfile"
+                fi
+            else
+                printf '%s\n' "$cur" >> "$tmpfile"
+            fi
+            ;;
+    esac
+done < "$file"
+
+if [ "$key_written" -eq 0 ] && [ "$found_section" -eq 1 ]; then
+    printf '%s\n' "$line" >> "$tmpfile"
+    key_written=1
+fi
+
+if [ "$key_written" -eq 0 ]; then
+    printf '\n[%s]\n%s\n' "$section" "$line" >> "$tmpfile"
+fi
+
+cp "$tmpfile" "$file"
