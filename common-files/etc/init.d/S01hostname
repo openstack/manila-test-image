@@ -1,0 +1,8 @@
+#!/bin/sh
+# Set a unique hostname derived from the primary network interface MAC.
+# Needed because NFSv4 client identification includes hostname; two VMs
+# with the same hostname confuse NFS-Ganesha into expiring state.
+
+mac=$(cat /sys/class/net/eth0/address 2>/dev/null) || return
+suffix=$(printf '%s' "$mac" | sed 's/://g' | tail -c 6)
+hostname "manila-${suffix}"
