@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Emit metadata-service SSH public keys, one per line, on stdout.
 check_net() {
     url="http://169.254.169.254/2009-04-04/meta-data"
     (
@@ -10,8 +11,9 @@ check_net() {
             key=$(echo $line | sed 's/\([0-9]\+\)=.*/\1/')
             key_url=$url/public-keys/$key/openssh-key
             wget -q -O - -T 10 $key_url 2> /dev/null || exit 1
+            echo    # terminate the key line; the service omits the newline
         done
-    ) >> authorized_keys
+    )
 }
 
 json_metadata() {
@@ -21,11 +23,12 @@ json_metadata() {
     JSON.sh < $F | sed -n "$SCRIPT"
 }
 
+# Emit config-drive SSH public keys, one per line, on stdout.
 check_cd() {
     [ -b /dev/sr0 ] || return
     mkdir /tmp/cd
     if mount /dev/sr0 /tmp/cd 2>/dev/null ; then
-        json_metadata /tmp/cd >> authorized_keys
+        json_metadata /tmp/cd
         umount /tmp/cd
     fi
     rmdir /tmp/cd
@@ -37,5 +40,16 @@ chmod 700 .
 [ -f authorized_keys ] || touch authorized_keys
 chmod 600 authorized_keys
 
-check_cd
-check_net
+# Rebuild authorized_keys from scratch each boot so keys cannot accumulate
+# or run together across reboots. Only replace the live file when we
+# actually fetched a key, so a transient metadata outage never wipes it.
+new_keys=authorized_keys.new
+: > $new_keys
+check_cd >> $new_keys
+check_net >> $new_keys
+if [ -s $new_keys ] ; then
+    mv $new_keys authorized_keys
+    chmod 600 authorized_keys
+else
+    rm -f $new_keys
+fi
