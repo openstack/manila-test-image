@@ -58,7 +58,12 @@ echo Deleting NBD
 sudo qemu-nbd -d $NBD
 
 echo Unloading NBD module
-sudo rmmod nbd
+# qemu-nbd -d releases the nbd device asynchronously, so the module is
+# sometimes still busy when rmmod runs and it exits non-zero. Under "set -e"
+# that intermittently failed the build on unlucky (often faster) nodes, after
+# all the real work had succeeded. Unloading the module is only housekeeping
+# -- leaving it loaded is harmless -- so never let it fail the build.
+sudo rmmod nbd || true
 
 echo Compressing qcow2
 rm -f $DISK_QCOW
