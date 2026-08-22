@@ -3,5 +3,5 @@
 
 if ! pdbedit -L | grep root
 then
-	printf "root\nroot\n" | smbpasswd -a -s root
+	printf "zorilla\nzorilla\n" | smbpasswd -a -s root
 fi
