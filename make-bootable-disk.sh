@@ -33,13 +33,19 @@ echo Creating NBD from qcow2
 sudo qemu-nbd -c $NBD -f qcow2 $TEMP_QCOW
 
 echo Writing partition table
-sudo parted -s $NBD -- mklabel msdos mkpart primary ext2 4MiB -1s set 1 boot on
+sudo parted -s $NBD -- mklabel msdos mkpart primary ext4 4MiB -1s set 1 boot on
 
 echo Copying boot block
 sudo dd if=$BR_OUTPUT/images/syslinux/mbr.bin of=$NBD bs=440 count=1
 
 echo Creating filesystem
-sudo mkfs.ext2 -L root -E nodiscard $PART
+# ext4 (journaled) so a hard power-off -- which nova stop performs when the
+# guest does not honor ACPI -- replays cleanly on the next mount instead of
+# leaving an un-recoverable dirty ext2 (orphaned inodes -> file I/O errors).
+# Disable the 64bit and metadata_csum features: the syslinux/extlinux we
+# install to boot the image cannot read an ext4 that enables them (modern
+# mkfs.ext4 turns them on by default), and the guest would fail to boot.
+sudo mkfs.ext4 -L root -O ^64bit,^metadata_csum -E nodiscard $PART
 
 echo Mounting filesystem
 sudo mkdir -p $MOUNT
