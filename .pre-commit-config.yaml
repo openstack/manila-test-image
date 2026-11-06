@@ -1,0 +1,24 @@
+# Run `pip install pre-commit && pre-commit install` once to enable.
+# Mirrors the checks Zuul gates on (openstack-tox-bashate) so lint is caught
+# locally before pushing to Gerrit.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: local
+    hooks:
+      - id: bashate
+        name: bashate
+        description: Lint shell scripts (same selection as tox -e bashate).
+        entry: bashate -v
+        language: python
+        additional_dependencies: [bashate>=0.5.1]
+        # *.sh anywhere, plus the extensionless init.d scripts.
+        files: '(\.sh$|^common-files/etc/init\.d/)'
+        exclude: '^(buildroot|download|output-.*|overlay-.*)/'
